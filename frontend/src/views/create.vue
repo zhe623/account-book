@@ -3,64 +3,73 @@
     <h1 class="title">添加记录</h1>
     <div class="hr-line"></div>
 
-    <form @submit.prevent="addRecord" class="form-horizontal" role="form">
-      <div class="form-group">
-        <label class="col-sm-2 control-label">事项</label>
-        <div class="col-sm-10">
-          <input v-model="form.title" type="text" class="form-control" placeholder="请输入事项">
-        </div>
-      </div>
+    <el-form
+      :model="form"
+      label-width="90px"
+      label-position="left"
+      class="form-container"
+    >
+      <el-form-item label="事项">
+        <el-input v-model="form.title" placeholder="请输入事项" />
+      </el-form-item>
 
-      <div class="form-group">
-        <label class="col-sm-2 control-label">发生时间</label>
-        <div class="col-sm-10">
-          <input v-model="form.time" type="date" class="form-control">
-        </div>
-      </div>
+      <el-form-item label="发生时间">
+        <el-date-picker
+          v-model="form.time"
+          type="date"
+          placeholder="请选择日期"
+          style="width: 100%"
+          
+        />
+      </el-form-item>
 
-      <div class="form-group">
-        <label class="col-sm-2 control-label">类型</label>
-        <div class="col-sm-10">
-          <select v-model="form.type" class="form-control">
-            <option value="-1">支出</option>
-            <option value="1">收入</option>
-          </select>
-        </div>
-      </div>
+      <el-form-item label="类型">
+        <el-select v-model="form.type" placeholder="请选择类型" style="width: 100%">
+          <el-option label="支出" value="-1" />
+          <el-option label="收入" value="1" />
+        </el-select>
+      </el-form-item>
 
-      <div class="form-group">
-        <label class="col-sm-2 control-label">金额</label>
-        <div class="col-sm-10">
-          <input v-model="form.account" type="number" class="form-control" placeholder="请输入金额">
-        </div>
-      </div>
+      <el-form-item label="金额">
+        <el-input
+          v-model="form.account"
+          type="number"
+          placeholder="请输入金额"
+        />
+      </el-form-item>
 
-      <div class="form-group">
-        <label class="col-sm-2 control-label">备注</label>
-        <div class="col-sm-10">
-          <textarea v-model="form.remark" class="form-control" rows="4"></textarea>
-        </div>
-      </div>
+      <el-form-item label="备注">
+        <el-input
+          v-model="form.remark"
+          type="textarea"
+          :rows="4"
+          placeholder="请输入备注"
+        />
+      </el-form-item>
 
       <div style="height:24px"></div>
 
-      <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
-          <button type="submit" class="btn btn-add">添加</button>
-        </div>
-      </div>
-    </form>
+      <el-form-item>
+        <el-button
+          type="primary"
+          class="btn-add"
+          @click="addRecord"
+        >
+          添加
+        </el-button>
+      </el-form-item>
+    </el-form>
   </div>
 </template>
 
 <script setup>
 import { reactive } from 'vue'
-import { addAccount } from '@/api/account' // 引入API方法
 import { useRouter } from 'vue-router'
+import { addAccount } from '@/api/account'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 
-// 创建表单数据
 const form = reactive({
   title: '',
   time: '',
@@ -69,31 +78,52 @@ const form = reactive({
   remark: ''
 })
 
-// 提交方法
 async function addRecord() {
   try {
     const res = await addAccount(form)
     if (res.code === '0000') {
-      alert('添加成功！')
-      // 提交后清空表单
-      Object.keys(form).forEach(key => form[key] = '')
+      ElMessage.success('添加成功！')
+      Object.keys(form).forEach(key => (form[key] = ''))
       router.push('/account')
     } else {
-      alert('添加失败：' + res.msg)
+      ElMessage.error('添加失败：' + res.msg)
     }
   } catch (err) {
     console.error(err)
-    alert('请求出错')
+    ElMessage.error('请求出错')
   }
 }
 </script>
 
 <style scoped>
-body { background: #fff; }
-.container-main { max-width: 720px; margin: 40px auto; }
-h1.title { font-weight: 500; margin-bottom: 20px; font-size: 32px; }
-.form-horizontal .form-group { margin-left: 0; margin-right: 0; }
-.btn-add { width: 100%; background:#2c7bb2; border-color:#2c7bb2; color:#fff; padding:12px 16px; border-radius:4px; }
-.hr-line { border-top:1px solid #eee; margin:18px 0 24px; }
-.form-control { box-shadow: none; }
+.container-main {
+  max-width: 720px;
+  margin: 40px auto;
+  background: #fff;
+  padding: 20px 30px;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+h1.title {
+  font-weight: 500;
+  margin-bottom: 20px;
+  font-size: 28px;
+  color: #333;
+}
+
+.hr-line {
+  border-top: 1px solid #eee;
+  margin: 18px 0 24px;
+}
+
+.btn-add {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 4px;
+}
+
+.form-container {
+  margin-top: 10px;
+}
 </style>
