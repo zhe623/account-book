@@ -5,6 +5,43 @@
       <h2 style="text-align: center; margin-top: 20px; color: #303133;">记账本</h2>
       <el-divider></el-divider>
 
+      <!-- 筛选导航栏 -->
+      <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 20px;">
+        <el-select v-model="filterType" placeholder="筛选方式" style="width: 150px;">
+          <el-option label="不限" value="none" />
+          <el-option label="按类型" value="type" />
+          <el-option label="按时间" value="time" />
+          <el-option label="按金额" value="amount" />
+        </el-select>
+
+        <!-- 根据不同筛选方式显示不同输入 -->
+        <template v-if="filterType === 'type'">
+          <el-select v-model="filterValue" placeholder="选择类型" style="width: 120px;">
+            <el-option label="支出" :value="-1" />
+            <el-option label="收入" :value="1" />
+          </el-select>
+        </template>
+
+        <template v-else-if="filterType === 'time'">
+          <el-date-picker
+            v-model="filterValue"
+            type="daterange"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
+          />
+        </template>
+
+        <template v-else-if="filterType === 'amount'">
+          <el-input-number v-model="minAmount" placeholder="最小" :min="0" />
+          <el-input-number v-model="maxAmount" placeholder="最大" :min="0" />
+        </template>
+
+        <el-button type="primary" @click="applyFilter">筛选</el-button>
+        <el-button @click="resetFilter">重置</el-button>
+      </div>
+
       <!-- 账单列表 -->
       <div v-if="accounts.length > 0">
         <el-card
@@ -68,7 +105,14 @@ import { deleteAccount } from '@/api/account.js'
 
 const accounts = ref([])
 
+// 筛选相关变量
+const filterType = ref('none')
+const filterValue = ref(null)
+const minAmount = ref(null)
+const maxAmount = ref(null)
+
 const formatDate = (date) => moment(date).format('YYYY-MM-DD')
+
 
 // 加载账单数据
 async function loadAccounts() {
@@ -78,6 +122,42 @@ async function loadAccounts() {
   } catch (err) {
     console.error('加载账单失败：', err)
   }
+}
+
+// 应用筛选条件
+async function applyFilter() {
+  try {
+    let query = {}
+
+    if (filterType.value === 'type') {
+      query.type = filterValue.value
+    } else if (filterType.value === 'time' && filterValue.value?.length === 2) {
+      query.start = filterValue.value[0]
+      query.end = filterValue.value[1]
+    } else if (filterType.value === 'amount') {
+      if (minAmount.value !== null && minAmount.value !== '') query.min = minAmount.value
+      if (maxAmount.value !== null && maxAmount.value !== '') query.max = maxAmount.value
+    }
+
+    const res = await axios.get('http://localhost:3000/api/account/search', {
+      params: query
+    })
+
+    accounts.value = res.data.data || []
+  } catch (err) {
+    console.error('筛选失败：', err)
+    ElMessage.error('筛选请求出错')
+  }
+}
+
+
+// 重置筛选
+function resetFilter() {
+  filterType.value = 'none'
+  filterValue.value = null
+  minAmount.value = null
+  maxAmount.value = null
+  loadAccounts()
 }
 
 // 删除账单
