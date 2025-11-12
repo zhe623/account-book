@@ -106,10 +106,21 @@ router.get('/account/search',async (req,res)=>{
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await Account.findByIdAndUpdate(id, req.body, { new: true });
+    const result = await AccountModel.findByIdAndUpdate(id, req.body, { new: true });
     res.json({ code: '0000', msg: '修改成功', data: result });
   } catch (err) {
     res.json({ code: '0001', msg: '修改失败', error: err.message });
+  }
+});
+
+//获取单个账目详情
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const account = await AccountModel.findById(id);
+    res.json({ code: '0000', msg: '获取成功', data: account });
+  } catch (err) {
+    res.json({ code: '0001', msg: '获取失败', error: err.message });
   }
 });
 

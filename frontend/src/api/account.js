@@ -20,3 +20,15 @@ export async function deleteAccount(id) {
   const res = await axios.delete(`${baseURL}/account/${id}`)
   return res.data
 }
+
+//获取单个账目详情
+export async function getAccountDetail(id) {
+  const res = await axios.get(`${baseURL}/account/${id}`)
+  return res.data
+}
+
+//修改账目
+export async function updateAccount(id, data) {
+  const res = await axios.put(`${baseURL}/account/${id}`, data)
+  return res.data
+}

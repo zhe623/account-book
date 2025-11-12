@@ -69,6 +69,15 @@
               <div class="account-amount" :style="item.type === -1 ? 'color:#F56C6C' : 'color:#67C23A'">
                 {{ item.account * item.type }}
               </div>
+              
+              <el-button
+                type="primary"
+                size="small"
+                icon="Edit"
+                circle
+                @click="editRecord(item._id)"
+              ></el-button>
+
               <el-button
                 type="danger"
                 size="small"
@@ -102,6 +111,7 @@ import axios from 'axios'
 import moment from 'moment'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { deleteAccount } from '@/api/account.js'
+import { useRouter } from 'vue-router'
 
 const accounts = ref([])
 
@@ -181,6 +191,14 @@ async function deleteRecord(id) {
   }
 }
 
+// 编辑账单
+
+const router = useRouter()
+function editRecord(id) {
+  router.push(`/account/edit/${id}`)
+}
+
+
 onMounted(loadAccounts)
 </script>
 
@@ -209,7 +227,7 @@ onMounted(loadAccounts)
 .account-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
 }
 
 .account-amount {

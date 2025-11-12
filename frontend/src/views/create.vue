@@ -1,6 +1,6 @@
 <template>
   <div class="container-main">
-    <h1 class="title">添加记录</h1>
+    <h1 class="title">{{ isEdit ? '编辑记录' : '添加记录' }}</h1>
     <div class="hr-line"></div>
 
     <el-form
@@ -55,20 +55,26 @@
           class="btn-add"
           @click="addRecord"
         >
-          添加
+          {{ isEdit ? '保存修改' : '添加' }}
         </el-button>
+
       </el-form-item>
     </el-form>
   </div>
 </template>
 
 <script setup>
-import { reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import { addAccount } from '@/api/account'
+import { reactive, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { addAccount, getAccountDetail, updateAccount } from '@/api/account'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
+const route = useRoute()
+
+const isEdit = !!route.params.id// 判断是否为编辑模式 转换为布尔值
+
+
 
 const form = reactive({
   title: '',
@@ -78,15 +84,30 @@ const form = reactive({
   remark: ''
 })
 
+onMounted(async () => {
+  if (isEdit) {
+    const res = await getAccountDetail(route.params.id)
+    Object.assign(form, res.data)
+  }
+})
+
+
 async function addRecord() {
   try {
-    const res = await addAccount(form)
-    if (res.code === '0000') {
-      ElMessage.success('添加成功！')
-      Object.keys(form).forEach(key => (form[key] = ''))
+    let res
+    if (isEdit) {
+      // 编辑模式：发 PUT 请求
+      res = await updateAccount(route.params.id, form)
+    } else {
+      // 新增模式：发 POST 请求
+      res = await addAccount(form)
+    }
+
+    if (res.code === '0000' || res.data?.code === '0000') {
+      ElMessage.success(isEdit ? '修改成功！' : '添加成功！')
       router.push('/account')
     } else {
-      ElMessage.error('添加失败：' + res.msg)
+      ElMessage.error((isEdit ? '修改失败：' : '添加失败：') + (res.msg || res.data?.msg))
     }
   } catch (err) {
     console.error(err)
