@@ -5,6 +5,10 @@ import create from "@/views/create.vue";
 
 const routes = [
   {
+    path: "/",
+    redirect: "/account", // 重定向到账单列表页
+  },
+  {
     path: "/account",
     name: "Home",
     component: accountList, // 首页：账单列表
