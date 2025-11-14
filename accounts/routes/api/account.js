@@ -117,8 +117,8 @@ router.put('/:id', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const account = await AccountModel.findById(id);
-    res.json({ code: '0000', msg: '获取成功', data: account });
+    const result = await AccountModel.findById(id);
+    res.json({ code: '0000', msg: '获取成功', data: result });
   } catch (err) {
     res.json({ code: '0001', msg: '获取失败', error: err.message });
   }
